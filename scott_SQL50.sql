@@ -118,6 +118,8 @@ group by job;
 select job, count(job)
 from emp
 group by job;
+
+--- END 2023.07.18 ---
  
 -- 33. 관리자의 수를 출력하되, 관리자 번호가 중복되지 않게하라. 그리고, 컬럼명을 Number of Manager로 지정하여 출력
 select count(distinct(MGR)) as "Number of Manager" from emp;
