@@ -103,3 +103,170 @@ from emp E, emp M
 where E.mgr=M.empno and E.hiredate < M.hiredate;
 
 --- END 2023.07.17 ---
+
+-- 30. 모든 사원의 급여 최고액,최저액,총액 및 평균액을 출력하되 각 컬럼명을 Maximum, Minimum, Sum, Average로 지정하여 출력
+SELECT max(sal) as "Maximum", min(sal) as "Minimum",
+sum(sal) as "Sum", avg(sal) as "Average"
+from emp;
+ 
+-- 31. 각 직업별로 급여 최저액.최고액,총액 및 평균액을 출력
+select job, max(sal), min(sal), sum(sal), avg(sal) -- 단위 행하고는 같이 사용할 수 있다.
+from emp
+group by job;
+ 
+-- 32. 직업이 동일한 사람 수를 직업과 같이 출력
+select job, count(job)
+from emp
+group by job;
+ 
+-- 33. 관리자의 수를 출력하되, 관리자 번호가 중복되지 않게하라. 그리고, 컬럼명을 Number of Manager로 지정하여 출력
+select count(distinct(MGR)) as "Number of Manager" from emp;
+ 
+-- 34. 최고 급여와 최저 급여의 차액을 출력
+SELECT max(sal)-min(sal) from emp;
+ 
+-- 35. 관리자 번호 및 해당 관리자에 속한 사원들의 최저 급여를 출력 (단, 관리자가 없는 사원 및 최저 급여가 1000 미만인 그룹은 제외. 급여 기준 내림차순)
+select MGR, min(sal)
+from emp
+where MGR is not null
+group by MGR
+having min(sal) >= 1000
+group by min(sal);
+ 
+-- 36. 부서별로 부서이름, 부서위치, 사원 수 및 평균 급여를 출력0 그리고 각각의 컬럼명을 부서명,위치,사원의 수,평균급여로 표시
+SELECT E.DEPTNO AS "부서명", D.DNAME AS "부서이름", D.LOC AS "위치",
+COUNT(E.EMPNO) AS "사원의 수", AVG(E.SAL) AS "평균급여"
+FROM EMP E, DEPT D
+WHERE E.DEPTNO=D.DEPTNO
+GROUP BY E.DEPTNO, D.DNAME, D.LOC
+ 
+-- 37. Smith와 동일한 부서에 속한 모든 사원의 이름 및 입사일을 출력 단, Smith는 제외
+SELECT ENAME, TO_CHAR(HIREDATE,'YYYY-MM-DD')
+FROM EMP
+WHERE DEPTNO IN(SELECT DEPTNO
+FROM EMP
+WHERE ENAME='SMITH')
+AND ENAME!='SMITH'
+ 
+-- 38. 자신의 급여가 평균 급여보다 많은 모든 사원의 사원 번호, 이름, 급여를 표시하는 질의를 작성하고 급여를 기준으로 결과를 내림차순으로 정렬
+SELECT EMPNO, ENAME, SAL
+FROM EMP
+WHERE SAL>(SELECT AVG(SAL)
+FROM EMP)
+ORDER BY SAL DESC
+ 
+-- 39. 이름에 T가 들어가는 사원의 속한 부서에서 근무하는 모든 사원의 사원번호 및 이름을 출력
+SELECT EMPNO, ENAME
+FROM EMP
+WHERE DEPTNO IN(SELECT DEPTNO
+FROM EMP
+WHERE ENAME LIKE '%T%')
+ 
+-- 40. 부서위치가 Dallas인 모든 사원의 이름,부서번호 및 직위를 출력
+SELECT E.ENAME, E.DEPTNO, E.JOB
+FROM EMP E, DEPT D
+WHERE E.DEPTNO=D.DEPTNO
+AND D.LOC='DALLAS'
+ 
+-- 41. KING에게 보고하는 모든 사원의 이름과 급여를 출력
+SELECT ENAME, SAL
+FROM EMP
+WHERE MGR=(SELECT EMPNO
+FROM EMP
+WHERE ENAME='KING')
+ 
+-- 42. Sales 부서의 모든 사원에 대한 부서번호, 이름 및 직위를 출력
+SELECT E.DEPTNO, E.ENAME, E.JOB
+FROM EMP E, DEPT D
+WHERE E.DEPTNO=D.DEPTNO
+AND D.DNAME='SALES'
+ 
+SELECT E.DEPTNO, E.ENAME, E.JOB
+FROM EMP E inner join DEPT D on E.DEPTNO=D.DEPTNO
+where D.DNAME='SALES'
+ 
+--43> 자신의 급여가 평균 급여보다 많고 이름에 T가 들어가는 사원과
+동일한 부서에 근무하는 모든 사원의 사원 번호, 이름 및 급여를 출력하라.
+SELECT EMPNO, ENAME, SAL
+FROM EMP
+WHERE SAL > (SELECT AVG(SAL)
+FROM EMP)
+AND DEPTNO IN(SELECT DEPTNO
+FROM EMP
+WHERE ENAME LIKE '%T%')
+ 
+--44> 커미션을 받는 사원과 급여가 일치하는 사원의 이름,부서번호,급여를 출력하라.
+SELECT ENAME, DEPTNO, SAL
+FROM EMP
+WHERE SAL IN(SELECT SAL
+FROM EMP
+WHERE COMM IS NOT NULL)
+ 
+--45> Dallas에서 근무하는 사원과 직업이 일치하는 사원의 이름,부서이름, 및 급여를 출력하시오
+SELECT E.ENAME, D.DNAME, E.SAL
+FROM EMP E, DEPT D
+WHERE E.DEPTNO=D.DEPTNO
+AND E.JOB IN(SELECT E.JOB
+FROM EMP E, DEPT D
+WHERE E.DEPTNO=D.DEPTNO
+AND D.LOC='DALLAS')
+ 
+--46> Scott과 동일한 급여 및 커미션을 받는 모든 사원의 이름, 입사일 및 급여를 출력하시오
+SELECT ENAME, HIREDATE, SAL
+FROM EMP
+WHERE SAL=(SELECT SAL
+FROM EMP
+WHERE ENAME='SCOTT')
+AND NVL(COMM,0)=(SELECT NVL(COMM,0)
+FROM EMP
+WHERE ENAME='SCOTT')
+ 
+--47> 직업이 Clerk 인 사원들보다 더 많은 급여를 받는 사원의 사원번호, 이름, 급여를 출력하되,
+결과를 급여가 높은 순으로 정렬하라.
+SELECT EMPNO, ENAME, SAL
+FROM EMP
+WHERE SAL>ALL(SELECT SAL
+FROM EMP
+WHERE JOB='CLERK') --결국 최대값과 비교 any 최소값과 비교
+ORDER BY SAL DESC
+ 
+--48> 이름에 A가 들어가는 사원과 같은 직업을 가진 사원의 이름과 월급, 부서번호를 출력하라.
+SELECT ENAME, SAL, DEPTNO
+FROM EMP
+WHERE JOB IN(SELECT JOB
+FROM EMP
+WHERE ENAME LIKE '%A%')
+ 
+--49> New York 에서 근무하는 사원과 급여 및 커미션이 같은 사원의 사원이름과 부서명을 출력하라.
+select * from emp join dept
+on emp.deptno = dept.deptno
+and dept.loc='NEW YORK';
+ 
+SELECT E.ENAME, D.DNAME
+FROM EMP E, DEPT D
+WHERE
+e.deptno= d.deptno
+AND E.SAL IN(
+SELECT E.SAL
+FROM EMP E, DEPT D
+WHERE E.DEPTNO=D.DEPTNO AND LOC='NEW YORK'
+)
+AND NVL(COMM,0) IN(
+SELECT NVL(COMM,0)
+FROM EMP E, DEPT D
+WHERE E.DEPTNO=D.DEPTNO
+AND LOC='NEW YORK');
+ 
+--50> Dallas에서 근무하는 사원과 직업 및 관리자가 같은 사원의 사원번호,사원이름,
+직업,월급,부서명,커미션을 출력하되 커미션이 책정되지 않은 사원은 NoCommission으로 표시하고,
+커미션의 컬럼명은 Comm으로 나오게 출력하시오. (단, 최고월급부터 출력되게 하시오)
+SELECT E.EMPNO, E.ENAME, E.JOB, E.SAL, D.DNAME,
+NVL((TO_CHAR(E.COMM)),'NoCommision') AS "COMM"
+FROM EMP E, DEPT D
+WHERE E.DEPTNO=D.DEPTNO
+AND JOB IN(SELECT JOB
+FROM EMP E, DEPT D
+WHERE E.DEPTNO=D.DEPTNO AND LOC='DALLAS')
+AND MGR IN(SELECT MGR
+FROM EMP E, DEPT D
+WHERE E.DEPTNO=D.DEPTNO AND LOC='DALLAS')
