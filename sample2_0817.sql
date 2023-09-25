@@ -24,7 +24,8 @@ insert into AUTHORITIES (username,AUTHORITY) values('admin','ROLE_MANAGER');
 insert into AUTHORITIES (username,AUTHORITY) values('admin','ROLE_ADMIN');
 
 commit;
-
+delete from authorities where username = 'admin';
+delete from users where username = 'admin';
 select * from users;
 select * from AUTHORITIES;
 select * from AUTHORITIES, users where users.username = AUTHORITIES.username;
